@@ -1,4 +1,4 @@
-from gtfs_functions import Feed
+from gtfs_functions_sample import Feed
 
 # Define a function to create and process GTFS feed objects
 def create_feed(gtfs_url, start_date=None, end_date=None, time_windows=None):
