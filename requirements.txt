@@ -16,3 +16,5 @@ ipywidgets
 pandas
 numpy
 ipykernel
+black
+isort

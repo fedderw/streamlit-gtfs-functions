@@ -1,6 +1,7 @@
-import streamlit as st
 import geopandas as gpd
+import streamlit as st
 from gtfs_functions.gtfs_plots import map_gdf
+
 
 # Define a function to display geographic data in Streamlit using Geopandas and mapping functions
 def display_geographic_data(gdf, title, color_column, tooltip_vars):
