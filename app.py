@@ -21,15 +21,18 @@ st.title("Bus System Explorer App")
 st.write("Explore the speed and frequency of a bus system")
 # Read the gtfs feed and perform analysis
 # Function to read the GTFS feed and return the feed object
-
-
-@st.cache_data
-def load_data(gtfs_feed_url):
-    feed = Feed(
+# You should cache your pygwalker renderer, if you don't want your memory to explode
+@st.cache_resource
+def get_feed(gtfs_feed_url):
+    return Feed(
         gtfs_feed_url,
         time_windows=[0, 5, 9, 12, 16, 19, 24],
         busiest_date=True,
     )
+
+@st.cache_data
+def load_data(_feed):
+  
     feed.get_files()
     stop_freq = feed.stops_freq
     # Get trips per hour by extracted the integers from the window column that are in format "5:00-6:30"
@@ -39,29 +42,30 @@ def load_data(gtfs_feed_url):
         stop_freq.window_end - stop_freq.window_start
     )
     line_freq = feed.lines_freq
-    segments_gdf = feed.segments
-    feed.get_speeds()
-    speeds = feed.avg_speeds
-    speeds['speed_mph'] = speeds['speed_kmh'] * 0.621371
-    speeds['avg_route_speed_mph'] = speeds['avg_route_speed_kmh'] * 0.621371
-    speeds['segment_max_speed_mph'] = speeds['segment_max_speed_kmh'] * 0.621371
-    segments_freq = feed.segments_freq
+    # segments_gdf = feed.segments
+    # feed.get_speeds()
+    # speeds = feed.avg_speeds
+    # speeds['speed_mph'] = speeds['speed_kmh'] * 0.621371
+    # speeds['avg_route_speed_mph'] = speeds['avg_route_speed_kmh'] * 0.621371
+    # speeds['segment_max_speed_mph'] = speeds['segment_max_speed_kmh'] * 0.621371
+    # segments_freq = feed.segments_freq
 
 
 
 
-    return feed, stop_freq, line_freq, segments_gdf, speeds, segments_freq
+    return stop_freq, line_freq
 
+presets = {"MDOT MTA Local Bus":"https://feeds.mta.maryland.gov/gtfs/local-bus","Charm City Circulator":"https://transportation.baltimorecity.gov/gtfsfile"}
 
 gtfs_path = st.text_input(
     r"GTFS Static URL", "https://feeds.mta.maryland.gov/gtfs/local-bus"
 )
-feed, stop_freq, line_freq, segments_gdf, speeds, segments_freq = load_data(f"{gtfs_path}")
+st.link_button("Search for more source feeds","https://www.transit.land/operators")
+feed = get_feed(f"{gtfs_path}")
+stop_freq, line_freq = load_data(feed)
 
 
 
-# For debugging, print a dataframe showing the unique window_start and window_end values
-# st.write(stop_freq[['window_start', 'window_end']].drop_duplicates())
 
 # Create a streamlit multiselect for the unique values in direction and window
 direction_name_int_map = {"Outbound": 0, "Inbound": 1}
@@ -93,7 +97,7 @@ m = map_gdf(
 st_data = folium_static(m, height=600)
 
 fig = px.histogram(
-    stop_freq.loc[stop_freq.min_per_trip<50], 
+    gdf, 
     x='min_per_trip', 
     title='Stop frequencies',
     template='simple_white', 
@@ -112,7 +116,42 @@ fig.update_layout(title_text=f"Stop frequencies for {direction_int_name_map[sele
 # Display the histogram in Streamlit
 st.plotly_chart(fig)
 
-# Additional visualizations using plotly and other libraries
-# You can add more visualizations based on the specific data returned by the gtfs_functions library
+# New Section to show line frequencies
+st.write("Line Frequencies")
 
-# The rest of the visualization code based on the gtfs_functions library examples and other customizations can be incorporated here
+
+gdf = line_freq.loc[(condition_dir & condition_window),:].reset_index()
+
+m = map_gdf(
+  gdf = gdf,
+  variable = 'ntrips',
+  colors = ["#d13870", "#e895b3" ,'#55d992', '#3ab071', '#0e8955','#066a40'],
+  tooltip_var = ['route_name'] ,
+  tooltip_labels = ['Route: '],
+  breaks = [10, 20, 30, 40, 120, 200]
+
+)
+
+
+# Display the map in Streamlit
+st_data = folium_static(m, height=600)
+
+fig = px.histogram(
+    gdf, 
+    x='min_per_trip', 
+    title='Line frequencies',
+    template='simple_white', 
+    nbins =20)
+
+# Update titles to be more readable
+fig.update_layout(
+    xaxis_title_text='Headways',
+    yaxis_title_text='Number of lines',
+    bargap=0.1
+)
+
+# Show the direction and the window in the title
+fig.update_layout(title_text=f"Line frequencies for {direction_int_name_map[selected_direction]} direction and {selected_window} window")
+
+
+st.plotly_chart(fig)
