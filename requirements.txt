@@ -18,3 +18,5 @@ numpy
 ipykernel
 black
 isort
+matplotlib 
+mapclassify

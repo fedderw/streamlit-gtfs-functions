@@ -44,13 +44,7 @@ def load_data(_feed):
         stop_freq.window_end - stop_freq.window_start
     )
     line_freq = feed.lines_freq
-    # segments_gdf = feed.segments
-    # feed.get_speeds()
-    # speeds = feed.avg_speeds
-    # speeds['speed_mph'] = speeds['speed_kmh'] * 0.621371
-    # speeds['avg_route_speed_mph'] = speeds['avg_route_speed_kmh'] * 0.621371
-    # speeds['segment_max_speed_mph'] = speeds['segment_max_speed_kmh'] * 0.621371
-    # segments_freq = feed.segments_freq
+   
 
 
 
