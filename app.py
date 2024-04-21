@@ -14,6 +14,8 @@ st.set_page_config(
     page_title="GTFS Explorer App",
 )
 
+direction_name_int_map = {"Outbound": 0, "Inbound": 1}
+direction_int_name_map = {0: "Outbound", 1: "Inbound"}
 
 
 # App title and description
@@ -68,8 +70,6 @@ stop_freq, line_freq = load_data(feed)
 
 
 # Create a streamlit multiselect for the unique values in direction and window
-direction_name_int_map = {"Outbound": 0, "Inbound": 1}
-direction_int_name_map = {0: "Outbound", 1: "Inbound"}
 
 selected_direction = st.selectbox(
     "Select Direction", stop_freq.direction_id.unique(), format_func=direction_int_name_map.get
