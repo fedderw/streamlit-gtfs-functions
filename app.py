@@ -60,6 +60,10 @@ def load_data_from_url(gtfs_path):
         )
         st.write("Getting lines frequencies...")
         line_freq = feed.lines_freq
+        # Need to add the tph column
+        line_freq['window_start'] = line_freq.window.str.extract(r"(\d+):").astype(int)
+        line_freq['window_end'] = line_freq.window.str.extract(r"-(\d+):").astype(int)
+        line_freq['tph'] = line_freq.ntrips / (line_freq.window_end - line_freq.window_start)
 
     return feed, stop_freq, line_freq
 
