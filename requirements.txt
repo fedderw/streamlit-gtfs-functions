@@ -2,7 +2,6 @@ geopandas
 plotly
 folium
 streamlit
-geopy
 keplergl
 streamlit_extras
 janitor
@@ -18,5 +17,4 @@ numpy
 ipykernel
 black
 isort
-matplotlib 
 mapclassify
